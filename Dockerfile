@@ -10,4 +10,4 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
 FROM dhi.io/aspnetcore:10 AS final
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["dotnet", "myWebApp.dll"]
+ENTRYPOINT ["dotnet", "LAS.dll"]
