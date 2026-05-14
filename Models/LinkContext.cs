@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models;
 
-public class TodoContext : DbContext
+public class LinkContext : DbContext
 {
-    public TodoContext(DbContextOptions<TodoContext> options)
+    public LinkContext(DbContextOptions<LinkContext> options)
         : base(options)
     {
     }
 
-    public DbSet<TodoItem> TodoItems { get; set; } = null!;
+    public DbSet<LinkItem> LinkItems { get; set; } = null!;
 }
