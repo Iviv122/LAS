@@ -1,7 +1,7 @@
 services:
-  postgres:
+  db:
     image: postgres:16
-    container_name: pg_dev
+    container_name: las_db 
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: yourpassword
@@ -10,5 +10,15 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    image: dotnet.10
+    container_name: las_app
+    ports:
+      - "9670:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=las_db;Port=5432;Database=myapp;Username=admin;Password=yourpassword;
+
 volumes:
   pgdata:
