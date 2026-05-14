@@ -15,7 +15,7 @@ namespace LAS.Migrations
                 name: "LinkItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },

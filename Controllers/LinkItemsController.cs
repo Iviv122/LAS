@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Humanizer;
 using LAS.Lib;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,23 +26,22 @@ namespace LAS.Controllers
 
         // GET: api/TodoItems/{hash}
         [HttpGet("{hash}")]
-        public async Task<RedirectResult> GetTodoItem(string hash)
+        public async Task<ActionResult> GetTodoItem(string hash)
         {
-            try
-            {
-                var todoItem = await _context.LinkItems.FindAsync(Base62.Decode(hash));
 
-                if (todoItem == null)
-                {
-                    return Redirect(Request.PathBase);
-                }
+            var todoItem = await _context.LinkItems.FindAsync(Base62.Decode(hash));
 
-                return Redirect(todoItem.Url);
-            }
-            catch (ArgumentException)
+            if (todoItem == null)
             {
-                return Redirect(Request.PathBase);
+                return NotFound();
             }
+            if (!IsAbsoluteUrl(todoItem.Url))
+            {
+                return BadRequest("Invalid response");
+            }
+
+
+            return Redirect(todoItem.Url);
         }
 
         // POST: api/TodoItems
@@ -51,14 +51,21 @@ namespace LAS.Controllers
         {
             LinkItem todoItem = DTOToItem(todoItemDTO);
 
+            if (!IsAbsoluteUrl(todoItem.Url))
+            {
+                return BadRequest("No http:// or https://");
+            }
+
             _context.LinkItems.Add(todoItem);
             await _context.SaveChangesAsync();
 
             var resultDto = ItemToDTO(todoItem);
 
+
+
             return CreatedAtAction(
                 nameof(GetTodoItem),
-                new {hash = Base62.Encode(todoItem.Id)},
+                new { hash = Base62.Encode(todoItem.Id) },
                 resultDto);
         }
 
@@ -72,5 +79,11 @@ namespace LAS.Controllers
             {
                 Url = todoItem.Url,
             };
+        private bool IsAbsoluteUrl(string url)
+        {
+            Uri result;
+            return Uri.TryCreate(url, UriKind.Absolute, out result);
+        }
+
     }
 }

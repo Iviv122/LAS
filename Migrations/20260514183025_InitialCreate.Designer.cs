@@ -11,7 +11,7 @@ using TodoApi.Models;
 namespace LAS.Migrations
 {
     [DbContext(typeof(LinkContext))]
-    [Migration("20260514181612_InitialCreate")]
+    [Migration("20260514183025_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -26,11 +26,11 @@ namespace LAS.Migrations
 
             modelBuilder.Entity("TodoApi.Models.LinkItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Url")
                         .IsRequired()

@@ -7,12 +7,12 @@ namespace LAS.Lib
     {
         private const string Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-        public static BigInteger Decode(string encoded)
+        public static long Decode(string encoded)
         {
             if (string.IsNullOrEmpty(encoded))
                 return 0;
 
-            var bigInteger = System.Numerics.BigInteger.Zero;
+            long bigInteger = 0;
 
             foreach (char c in encoded)
             {
