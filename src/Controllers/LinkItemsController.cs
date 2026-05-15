@@ -9,6 +9,7 @@ using LAS.Lib;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TodoApi.Models;
 
 namespace LAS.Controllers
@@ -58,15 +59,15 @@ namespace LAS.Controllers
             _context.LinkItems.Add(todoItem);
             await _context.SaveChangesAsync();
 
-            var hash = Base62.Encode(todoItem.Id);
+            string hash = Base62.Encode(todoItem.Id);
 
+#pragma warning disable 
             todoItemDTO.Url = Url.Action(
                         nameof(GetTodoItem),
                         ControllerContext.RouteData.Values["controller"].ToString(),
                         new { hash },
                         Request.Scheme);
-
-
+#pragma warning restore 
 
             return CreatedAtAction(
                 nameof(GetTodoItem),
@@ -87,7 +88,9 @@ namespace LAS.Controllers
         private bool IsAbsoluteUrl(string url)
         {
             Uri result;
+#pragma warning disable
             return Uri.TryCreate(url, UriKind.Absolute, out result);
+#pragma warning restore
         }
 
     }
