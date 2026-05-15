@@ -43,7 +43,6 @@ namespace LAS.Controllers
 
             return Redirect(todoItem.Url);
         }
-
         // POST: api/TodoItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -59,14 +58,20 @@ namespace LAS.Controllers
             _context.LinkItems.Add(todoItem);
             await _context.SaveChangesAsync();
 
-            var resultDto = ItemToDTO(todoItem);
+            var hash = Base62.Encode(todoItem.Id);
+
+            todoItemDTO.Url = Url.Action(
+                        nameof(GetTodoItem),
+                        ControllerContext.RouteData.Values["controller"].ToString(),
+                        new { hash },
+                        Request.Scheme);
 
 
 
             return CreatedAtAction(
                 nameof(GetTodoItem),
                 new { hash = Base62.Encode(todoItem.Id) },
-                resultDto);
+                todoItemDTO);
         }
 
         private static LinkItemDTO ItemToDTO(LinkItem todoItem) =>

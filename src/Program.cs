@@ -12,7 +12,17 @@ builder.Services.AddDbContext<LinkContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
     );
 
+ builder.Services.AddCors(options => options.AddPolicy(
+     "AllowAll",
+     p => p.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader()));
+
 var app = builder.Build();
+
+
+app.UseCors("AllowAll");
+app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -25,9 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
