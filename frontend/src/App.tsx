@@ -3,35 +3,37 @@ import $api from "./lib/client";
 
 function App() {
 
-  const { mutate, isPending, data } = $api.useMutation("post","/api/LinkItems",
+  const { mutate, isPending, data } = $api.useMutation("post", "/api/LinkItems",
     {
-      onError: (err) => {console.log({err})}
+      onError: (err) => { console.log({ err }) }
     },
   );
 
   const urlRef = useRef<HTMLInputElement>(null);
 
-  function HandleSubmit(e : React.SubmitEvent<HTMLFormElement>) {
+  function HandleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     if (urlRef.current) {
       mutate({
-        body:{
+        body: {
           url: urlRef.current.value
         }
       })
     }
   }
 
-  if(isPending) return <p>Loading...</p>
+  if (isPending) return <p>Loading...</p>
 
   return (
-    <>
-      <form onSubmit={e =>HandleSubmit(e)}>
-        <input ref={urlRef} className="border"></input>
-        <button type="submit">Send</button>
+    <div className="flex w-dvh h-dvh ">
+      <form onSubmit={e => HandleSubmit(e)}
+        className="shadow-2xl w-fit h-fit p-5 flex flex-col"
+        >
+        <h1>Shorten a long link</h1>
+        <input placeholder="https://examplelonglink.com" ref={urlRef} className="border"></input>
       </form>
       <h1>{data?.url}</h1>
-    </>
+    </div>
   )
 }
 
