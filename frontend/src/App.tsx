@@ -1,16 +1,14 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import $api from "./lib/client";
 import Button from "./components/button";
 
 function App() {
 
-  const { mutate, isPending, data,error } = $api.useMutation("post", "/api/LinkItems",
-    {
-      onError: (err) => { console.log({ err }) }
-    },
+  const { mutate, isPending, data, error } = $api.useMutation("post", "/api/LinkItems",
   );
 
   const urlRef = useRef<HTMLInputElement>(null);
+
 
   function HandleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -39,13 +37,26 @@ function App() {
         border-2
       border-stone-100
         "
-        >
+      >
         <h1 className="text-2xl">Shorten a long link</h1>
-        <input placeholder="https://example-long-link.com" ref={urlRef} className=" p-2 text-2xl rounded-xl border border-stone-200"></input>
-        <Button label="Submit"/>
 
-        <h1>{error}</h1>
-        <h1>{data?.url}</h1>
+        {error && (
+          <p className="rounded-xl bg-red-500/15  text-red-700 px-4 py-3">
+            {String(error)}
+          </p>
+        )}
+        {data?.url && (
+          <a
+          className="rounded-xl bg-green-500/15  text-green-700 px-4 py-3 underline hover:text-green-800"
+          href={data?.url}>
+            {data?.url}
+          </a>
+        )}
+        <a className=""></a>
+
+        <input placeholder="https://example-long-link.com" ref={urlRef} className=" p-2 text-2xl rounded-xl border border-stone-200 tracking-tight"></input>
+        <Button label="Submit" />
+
       </form>
     </div>
   )
