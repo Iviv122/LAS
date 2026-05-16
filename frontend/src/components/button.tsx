@@ -15,11 +15,14 @@ export default function Button({label,className,type,onClick,ref} : ButtonProps)
     ref={ref}
     className={`
         p-4
-        bg-green-400
+        m-2
+        shadow-xl
         cursor-pointer
         w-fit
         text-2xl
         rounded-xl
+        border-2
+        border-stone-100
         `
          + " " + className}
     >{label}</button>

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,14 +14,31 @@ builder.Services.AddDbContext<LinkContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
     );
 
- builder.Services.AddCors(options => options.AddPolicy(
-     "AllowAll",
-     p => p.AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader()));
+builder.Services.AddStackExchangeRedisCache(options =>
+ {
+     options.Configuration = builder.Configuration.GetConnectionString("Redis");
+     options.InstanceName = "las:";
+ });
+
+builder.Services.AddCors(options => options.AddPolicy(
+    "AllowAll",
+    p => p.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()));
+
 
 var app = builder.Build();
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var currentTimeUTC = DateTime.UtcNow.ToString();
+    byte[] encodedCurrentTimeUTC = System.Text.Encoding.UTF8.GetBytes(currentTimeUTC);
+
+    var options = new DistributedCacheEntryOptions()
+        .SetSlidingExpiration(TimeSpan.FromSeconds(20));
+    app.Services.GetService<IDistributedCache>()
+                              .Set("cachedTimeUTC", encodedCurrentTimeUTC, options);
+});
 
 app.UseCors("AllowAll");
 app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());

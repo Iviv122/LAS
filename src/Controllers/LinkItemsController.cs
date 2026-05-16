@@ -1,15 +1,6 @@
-using System;
-using System.Buffers.Text;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Threading.Tasks;
-using Humanizer;
 using LAS.Lib;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Caching.Distributed;
 using TodoApi.Models;
 
 namespace LAS.Controllers
@@ -19,35 +10,54 @@ namespace LAS.Controllers
     public class LinkItemsController : ControllerBase
     {
         private readonly LinkContext _context;
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<LinkItemsController> _logger;
+        private const string LinkCacheKey = "link";
 
-        public LinkItemsController(LinkContext context)
+        public LinkItemsController(
+            LinkContext context,
+            IDistributedCache cache,
+            ILogger<LinkItemsController> logger
+            )
         {
             _context = context;
+            _cache = cache;
+            _logger = logger;
         }
 
         // GET: api/TodoItems/{hash}
         [HttpGet("{hash}")]
-        public async Task<ActionResult> GetTodoItem(string hash)
+        public async Task<ActionResult> GetTodoItem(string hash, CancellationToken cancellationToken = default)
         {
 
-            var todoItem = await _context.LinkItems.FindAsync(Base62.Decode(hash));
+            var cacheKey = $"link:{hash}";
 
-            if (todoItem == null)
+            _logger.LogInformation($"Fetching data for key: {cacheKey}",cacheKey);
+
+            var linkItem = await _cache.GetOrSetAsync(
+                cacheKey,
+                async () =>
+                {
+                    _logger.LogInformation($"Cache missing for key {cacheKey}",cacheKey);
+                    return await _context.LinkItems.FindAsync(Base62.Decode(hash));
+                },
+                cancellationToken: cancellationToken);
+
+            if (linkItem == null)
             {
                 return NotFound();
             }
-            if (!IsAbsoluteUrl(todoItem.Url))
+            if (!IsAbsoluteUrl(linkItem.Url))
             {
                 return BadRequest("Invalid response");
             }
 
-
-            return Redirect(todoItem.Url);
+            return Redirect(linkItem.Url);
         }
         // POST: api/TodoItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<LinkItemDTO>> PostTodoItem(LinkItemDTO todoItemDTO)
+        public async Task<ActionResult<LinkItemDTO>> PostTodoItem(LinkItemDTO todoItemDTO,CancellationToken cancellationToken =default)
         {
             LinkItem todoItem = DTOToItem(todoItemDTO);
 
@@ -56,8 +66,8 @@ namespace LAS.Controllers
                 return BadRequest("No http:// or https://");
             }
 
-            _context.LinkItems.Add(todoItem);
-            await _context.SaveChangesAsync();
+            await _context.LinkItems.AddAsync(todoItem);
+            await _context.SaveChangesAsync(cancellationToken);
 
             string hash = Base62.Encode(todoItem.Id);
 

@@ -1,5 +1,11 @@
 services:
   
+  redis:
+    image: redis:8.8-m03-alpine3.23
+    ports:
+      - 6379:6379
+    environment:
+            - REDIS_ARGS=--requirepass yourpassword --appendonly yes
   db:
     image: postgres
     restart: always

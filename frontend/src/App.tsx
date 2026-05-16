@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import $api from "./lib/client";
 import Button from "./components/button";
 
@@ -8,7 +8,6 @@ function App() {
   );
 
   const urlRef = useRef<HTMLInputElement>(null);
-
 
   function HandleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
